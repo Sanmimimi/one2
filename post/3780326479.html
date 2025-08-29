@@ -1,0 +1,863 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>阿里云角色SSO对接authentik进行单点登录 | GoodBoyboy 's Blog｜惬意小屋-点滴记忆</title><meta name="author" content="GoodBoyboy"><meta name="copyright" content="GoodBoyboy"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言 好久没写一篇正经的教程文章了，今天来写如何让authentik对接阿里云的角色SSO，实现单点登录指定角色 本质上任何支持SAML的第三方IAM都能完成，只不过大同小异，本教程采用authentik进行示例。 本教程结合Gemini 2.5 Pro+Deep Research完成，截稿时间：2025-07-11  正文 战略价值 下面为Gemini套话，可以跳过不看  将 Authentik">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里云角色SSO对接authentik进行单点登录">
+<meta property="og:url" content="https://blog.goodboyboy.top/posts/3780326479.html">
+<meta property="og:site_name" content="GoodBoyboy &#39;s Blog｜惬意小屋-点滴记忆">
+<meta property="og:description" content="前言 好久没写一篇正经的教程文章了，今天来写如何让authentik对接阿里云的角色SSO，实现单点登录指定角色 本质上任何支持SAML的第三方IAM都能完成，只不过大同小异，本教程采用authentik进行示例。 本教程结合Gemini 2.5 Pro+Deep Research完成，截稿时间：2025-07-11  正文 战略价值 下面为Gemini套话，可以跳过不看  将 Authentik">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g">
+<meta property="article:published_time" content="2025-07-11T14:26:41.000Z">
+<meta property="article:modified_time" content="2025-07-11T14:26:41.000Z">
+<meta property="article:author" content="GoodBoyboy">
+<meta property="article:tag" content="阿里云">
+<meta property="article:tag" content="SSO">
+<meta property="article:tag" content="authentik">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "阿里云角色SSO对接authentik进行单点登录",
+  "url": "https://blog.goodboyboy.top/posts/3780326479.html",
+  "image": "https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g",
+  "datePublished": "2025-07-11T14:26:41.000Z",
+  "dateModified": "2025-07-11T14:26:41.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "GoodBoyboy",
+      "url": "https://www.goodboyboy.top"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g"><link rel="canonical" href="https://blog.goodboyboy.top/posts/3780326479.html"><link rel="preconnect" href="//jsd.foxsay.top"/><link rel="stylesheet" href="/css/index.css?v=5.3.5"><link rel="stylesheet" href="https://jsd.foxsay.top/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><link rel="stylesheet" href="https://jsd.foxsay.top/npm/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://jsd.foxsay.top/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 8 || hour >= 22
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: GoodBoyboy","link":"链接: ","source":"来源: GoodBoyboy 's Blog｜惬意小屋-点滴记忆","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://jsd.foxsay.top/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '阿里云角色SSO对接authentik进行单点登录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/font.css" media="none" onload="this.media='all'"><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/APlayer.min.css"><style type="text/css">
+.spoiler {
+  display: inline;
+}
+p.spoiler {
+  display: flex;
+}
+.spoiler a {
+  pointer-events: none;
+}
+.spoiler-blur, .spoiler-blur > * {
+  transition: text-shadow .5s ease;
+}
+.spoiler .spoiler-blur, .spoiler .spoiler-blur > * {
+  color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
+  text-shadow: 0 0 10px grey;
+  cursor: pointer;
+}
+.spoiler .spoiler-blur:hover, .spoiler .spoiler-blur:hover > * {
+  text-shadow: 0 0 5px grey;
+}
+.spoiler-box, .spoiler-box > * {
+  transition: color .5s ease,
+  background-color .5s ease;
+}
+.spoiler .spoiler-box, .spoiler .spoiler-box > * {
+  color: black;
+  background-color: black;
+  text-shadow: none;
+}</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="GoodBoyboy 's Blog｜惬意小屋-点滴记忆" type="application/atom+xml">
+</head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://jsd.foxsay.top/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://jsd.foxsay.top/npm/pace-js@1.2.4/pace.min.js"></script><div id="web_bg" style="background-image: url(https://api.goodboyboy.top/bing/?rand=true);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">263</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">297</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">37</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-folder-open"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-list-ul"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li><li><a class="site-page child" href="/categories/%E7%94%9F%E6%B4%BB/"><i class="fa-fw fa fa-pencil"></i><span> 生活</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-file-alt"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/msg/"><i class="fa-fw fa fa-pencil"></i><span> 留言板</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 图库</span></a></li><li><a class="site-page child" href="/TimeLine/"><i class="fa-fw fa-solid fa-list"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/reports/"><i class="fa-fw fa-solid fa-flag"></i><span> 报告</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://www.goodboyboy.top/mikutap/"><i class="fa-fw fa-solid fa-tape"></i><span> Mikutap</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-gamepad"></i><span> 我的游戏库</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa-solid fa-music"></i><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%85%AC%E5%91%8A/"><i class="fa-fw fa fa-info-circle"></i><span> 公告</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/free/"><i class="fa-fw fas fa-heart"></i><span> 公益项目</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-address-card"></i><span> Me</span></a></div><div class="menus_item"><a class="site-page" href="/agreement/"><i class="fa-fw fa fa-pencil"></i><span> 用户协议与隐私政策</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-bus-alt"></i><span> 开往/十年</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://www.travellings.cn/go.html"><span> 开往</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://foreverblog.cn/go.html"><span> 十年之约</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-battery-full"></i><span> 运行状态</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://status.goodboyboy.top/status/normal"><span> 主节点</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://stats.uptimerobot.com/Q7nWTIH07K"><span> 备用节点</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-color: rgba(255,255,255,0);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" alt="Logo"><span class="site-name">GoodBoyboy 's Blog｜惬意小屋-点滴记忆</span></a><a class="nav-page-title" href="/"><span class="site-name">阿里云角色SSO对接authentik进行单点登录</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-folder-open"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-list-ul"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li><li><a class="site-page child" href="/categories/%E7%94%9F%E6%B4%BB/"><i class="fa-fw fa fa-pencil"></i><span> 生活</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-file-alt"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/msg/"><i class="fa-fw fa fa-pencil"></i><span> 留言板</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 图库</span></a></li><li><a class="site-page child" href="/TimeLine/"><i class="fa-fw fa-solid fa-list"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/reports/"><i class="fa-fw fa-solid fa-flag"></i><span> 报告</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://www.goodboyboy.top/mikutap/"><i class="fa-fw fa-solid fa-tape"></i><span> Mikutap</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-gamepad"></i><span> 我的游戏库</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa-solid fa-music"></i><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%85%AC%E5%91%8A/"><i class="fa-fw fa fa-info-circle"></i><span> 公告</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/free/"><i class="fa-fw fas fa-heart"></i><span> 公益项目</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-address-card"></i><span> Me</span></a></div><div class="menus_item"><a class="site-page" href="/agreement/"><i class="fa-fw fa fa-pencil"></i><span> 用户协议与隐私政策</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-bus-alt"></i><span> 开往/十年</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://www.travellings.cn/go.html"><span> 开往</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://foreverblog.cn/go.html"><span> 十年之约</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-battery-full"></i><span> 运行状态</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://status.goodboyboy.top/status/normal"><span> 主节点</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://stats.uptimerobot.com/Q7nWTIH07K"><span> 备用节点</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">阿里云角色SSO对接authentik进行单点登录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-07-11T14:26:41.000Z" title="发表于 2025-07-11 22:26:41">2025-07-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-07-11T14:26:41.000Z" title="更新于 2025-07-11 22:26:41">2025-07-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%99%E7%A8%8B/">教程</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web/">Web</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;此文章距离最后一次更新已有&quot;,&quot;messageNext&quot;:&quot;天, 文章内容可能已经过时.&quot;,&quot;postUpdate&quot;:&quot;2025-07-11 22:26:41&quot;}" hidden></div><h2 id="前言">前言</h2>
+<p>好久没写一篇正经的教程文章了，今天来写如何让authentik对接阿里云的角色SSO，实现单点登录指定角色</p>
+<p>本质上任何支持SAML的第三方IAM都能完成，只不过大同小异，本教程采用authentik进行示例。</p>
+<div class="note info flat"><p>本教程结合Gemini 2.5 Pro+Deep Research完成，截稿时间：2025-07-11</p>
+</div>
+<h2 id="正文">正文</h2>
+<h3 id="战略价值">战略价值</h3>
+<div class="note info flat"><p>下面为Gemini套话，可以跳过不看</p>
+</div>
+<p>将 Authentik 作为身份提供商（IdP）与阿里云进行集成，不仅仅是技术上的对接，更是一项具有深远战略意义的举措，旨在构建一个现代化、安全且高效的身份管理体系。其核心价值主要体现在以下几个方面：</p>
+<ul>
+<li>
+<p>集中式身份管理：将 Authentik 作为唯一的身份“真理之源”（Single Source of Truth），企业可以在一个统一的平台上管理所有用户的身份、凭证及其生命周期 。这意味着无需在阿里云 RAM 中创建和维护大量的独立 IAM 用户及其静态密码或访问密钥，极大地简化了管理复杂性。</p>
+</li>
+<li>
+<p>增强的安全态势：通过联合登录，用户不再需要长期有效的阿里云访问凭证。取而代之的是基于会话的、有时效性的临时安全令牌（STS Token）。这种模式消除了静态凭证泄露的风险，显著减少了攻击面，是云安全最佳实践的核心要求 。</p>
+</li>
+<li>
+<p>简化的用户访问流程：用户只需登录一次 Authentik 门户，即可通过单击应用图标无缝跳转至阿里云管理控制台，无需再次输入密码 。这不仅提升了用户体验，也提高了开发和运维人员的工作效率。</p>
+</li>
+<li>
+<p>统一的审计与合规：所有认证请求都将集中在 Authentik 进行记录和处理。这为安全审计提供了单一、全面的日志来源，有助于企业满足各类严格的合规性要求，如 SOX、PCI-DSS 等 。</p>
+</li>
+</ul>
+<h3 id="登录流程">登录流程</h3>
+<div class="note info flat"><p>虽然也是套话，但是建议了解一下</p>
+</div>
+<p>完整的 IdP 发起流程如下：</p>
+<ol>
+<li>
+<p>用户发起登录（IdP-Initiated）：用户首先登录到其个人 Authentik 应用仪表板，然后点击代表阿里云控制台的应用程序图标 。</p>
+</li>
+<li>
+<p>生成 SAML 断言：Authentik 接收到点击事件后，会生成一个经过数字签名的 SAML 断言（SAML Assertion）。这是一个 XML 格式的文档，其中包含了用户的身份信息（如用户名或邮箱）以及一系列特殊的属性，这些属性是阿里云用来确定用户应扮演何种角色的关键 。</p>
+</li>
+<li>
+<p>浏览器重定向与 POST 请求：Authentik 将包含 SAML 断言的表单返回给用户的浏览器，并通过 JavaScript 自动提交此表单。浏览器向阿里云的断言消费服务（Assertion Consumer Service, ACS）端点发送一个 HTTP POST 请求，请求体中即为 SAML 断言 。</p>
+</li>
+<li>
+<p>验证断言：阿里云的 SSO 服务接收到该 POST 请求后，首先会验证 SAML 断言的数字签名。它会使用预先配置好的、来自 Authentik 的 IdP 元数据中的公钥进行验签，以确保断言的完整性和来源可信性 。</p>
+</li>
+<li>
+<p>解析属性：验签成功后，SSO 服务会解析 SAML 断言的内容，重点提取两个自定义的关键属性：Role 和 RoleSessionName 。</p>
+</li>
+<li>
+<p>交换 STS 令牌：SSO 服务根据 Role 属性中指定的 RAM 角色 ARN 和 IdP ARN，调用阿里云的安全令牌服务（Security Token Service, STS），代表该用户请求扮演指定的 RAM 角色 。</p>
+</li>
+<li>
+<p>创建控制台会话：STS 验证请求合法性后，会颁发一个包含临时访问凭证（AccessKey ID, SecretAccessKey, 和 SecurityToken）的 STS 令牌。阿里云 SSO 服务利用这个 STS 令牌生成一个预签名的、具有时效性的控制台登录 URL 。</p>
+</li>
+<li>
+<p>重定向至控制台：最后，SSO 服务将此预签名 URL 返回给浏览器，浏览器自动跳转。用户最终无缝登录到阿里云管理控制台，并拥有了所扮演角色定义的全部权限。</p>
+</li>
+</ol>
+<h3 id="创建签名证书">创建签名证书</h3>
+<p>首先创建一个证书用于给SAML断言签名（当然你也可以用Authentik默认的证书，如果打算使用默认证书就可以跳过这节）</p>
+<p>在侧边栏找到<code>System</code>-&gt;<code>Certificates</code>，点击<code>生成</code>按钮</p>
+<p>常用名自己填就行，关键是<code>私钥算法</code>一定要选择<code>RSA</code>，千万不能选择<code>ECDSA</code>（大坑），因为阿里云不支持ECDSA签名验证，选择ECDSA会造成<code>NoPermission.NotTrusted</code></p>
+<p>创建完成进入下一节</p>
+<h3 id="创建Provider">创建Provider</h3>
+<p>这里我们先创建Provider</p>
+<p>在侧边栏找到<code>Application</code>-&gt;<code>Providers</code></p>
+<p>点击<code>创建</code>按钮，选择<code>SAML Provider</code>类型</p>
+<p><code>名称</code>：自填<br>
+<code>授权流程</code>：默认的两个哪个都行，explicit的需要手动确认授权，implicit为静默授权<br>
+<code>ACS URL</code>：为阿里云固定链接 <a target="_blank" rel="noopener external nofollow noreferrer" href="https://signin.aliyun.com/saml-role/sso">https://signin.aliyun.com/saml-role/sso</a>（国际站可能不同）来源：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://help.aliyun.com/zh/ram/user-guide/configure-alibaba-cloud-as-a-trusted-sp-for-role-based-sso">进行角色SSO时企业IdP的SAML配置_访问控制(RAM)-阿里云帮助中心</a><br>
+<code>颁发者（ EntityID）</code>：为阿里云固定内容：<code>urn:alibaba:cloudcomputing</code>，来源：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://help.aliyun.com/zh/ram/user-guide/configure-alibaba-cloud-as-a-trusted-sp-for-role-based-sso">进行角色SSO时企业IdP的SAML配置_访问控制(RAM)-阿里云帮助中心</a><br>
+<code>服务提供程序绑定</code>：为固定选项<code>POST</code><br>
+<code>Audience</code>：为阿里云固定内容：<code>urn:alibaba:cloudcomputing</code>，来源：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://help.aliyun.com/zh/ram/user-guide/saml-response-for-role-based-sso">角色SSO的SAML响应_访问控制(RAM)-阿里云帮助中心</a></p>
+<p>然后展开下面的<code>高级协议设置</code>，签名证书选择上一节创建的RSA证书，勾选<code>签名断言</code></p>
+<p>属性映射待会再设置</p>
+<h3 id="创建阿里云身份提供商">创建阿里云身份提供商</h3>
+<p>来到阿里云的访问控制RAM控制台<a target="_blank" rel="noopener external nofollow noreferrer" href="https://ram.console.aliyun.com/">https://ram.console.aliyun.com/</a></p>
+<p>在侧边栏找到<code>集成管理</code>-&gt;<code>SSO管理</code></p>
+<p>选择<code>角色SSO</code>-&gt;<code>SAML</code>，选择<code>创建身份提供商</code></p>
+<p><code>身份提供商名称</code>：自填，但是后面有参数会用到<br>
+<code>元数据文档</code>：在authentik中刚刚创建的Provider的总览里，有个元数据下载按钮，下载该xml文档然后上传即可</p>
+<p>创建完成后点击刚刚创建的身份提供商，找到<code>ARN</code>信息，复制备用，下文用<code>Idp ARN</code>代替该值</p>
+<h3 id="创建阿里云角色">创建阿里云角色</h3>
+<p>既然要扮演角色肯定要先创建角色</p>
+<p>在侧边栏找到<code>身份管理</code>-&gt;<code>角色</code></p>
+<p>点击<code>创建角色</code>，<code>信任主体类型</code>选择<code>身份提供商</code></p>
+<p>提示<code>如果需要信任身份提供商，切换编辑器到自定义模式后配置。</code>，点击旁边的<code>切换编辑器</code></p>
+<p>这里我们采用可视化编辑即可</p>
+<p><code>效果</code>：选择允许<br>
+<code>主体</code>：选择<code>身份提供商</code><br>
+<code>操作</code>：勾选<code>sts:AssumeRole</code>（旁边的SetSourceIdentity不知道有什么用）<br>
+<code>条件</code>：用于实现更复杂的限制策略，可以自己设置（我没设置）</p>
+<p>点击确定添加即可</p>
+<p>然后赋予角色权限</p>
+<p>点击刚刚添加的角色，在权限管理内新增授权，具体要什么权限自己定，然后记录<code>ARN</code>，后面备用，下文用<code>角色 ARN</code>代替</p>
+<blockquote>
+<p>Tips：这里信任策略阿里云已经正常生成好了，不用自己填写或者修改了</p>
+</blockquote>
+<h3 id="创建Authentik的属性映射">创建Authentik的属性映射</h3>
+<p>这里我们需要映射<code>Role</code>和<code>RoleSessionName</code>两个属性到SAML断言中</p>
+<p><code>Role</code>：让阿里云知道是扮演哪个角色以及来自哪个身份提供商<br>
+<code>RoleSessionName</code>：让阿里云知道是哪个用户（IAM的用户）进行了本次扮演（登录），用来作为登录用户信息的一部分显示在控制台上和操作审计日志</p>
+<p>在Authentik侧边栏中找到<code>Customization</code>-&gt;<code>Property Mappings</code></p>
+<p>选择<code>创建</code>，两个都是<code>SAML Provider Property Mapping</code>类型的</p>
+<p>先创建Role</p>
+<p><code>名称</code>：自填<br>
+<code>SAML 属性名称</code>：为阿里云固定内容：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.aliyun.com/SAML-Role/Attributes/Role">https://www.aliyun.com/SAML-Role/Attributes/Role</a><br>
+<code>表达式</code>：python写</p>
+<p>表达式这里返回的内容会出现在断言中，而该部分内容组如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">角色ARN,IdpARN</span><br></pre></td></tr></table></figure>
+<p>简单的表达式直接返回这个内容即可，当然你可以写更复杂的表达式，具体请参考Authentik官方文档中表达式一节</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="string">&quot;角色 ARN,Idp ARN&quot;</span></span><br></pre></td></tr></table></figure>
+<p>然后创建RoleSessionName</p>
+<p><code>名称</code>：自填<br>
+<code>SAML 属性名称</code>：为阿里云固定内容：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.aliyun.com/SAML-Role/Attributes/RoleSessionName">https://www.aliyun.com/SAML-Role/Attributes/RoleSessionName</a><br>
+<code>表达式</code>：python写</p>
+<p>这里需要返回一个唯一标识用户的值，如员工ID、Email地址等，取值要求为：<code>长度不少于2个字符且不超过64个字符，只能是英文字母、数字和特殊字符-_.@=</code></p>
+<p>我采用的是用户的Email</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> request.user.email</span><br></pre></td></tr></table></figure>
+<p>这里变量由Authentik提供，其他变量请看Authentik官方文档</p>
+<p>还有个可选的<code>SessionDuration</code>，表示会话有效期（我懒得弄没弄）</p>
+<p><code>名称</code>：自填<br>
+<code>SAML 属性名称</code>：为阿里云固定内容：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.aliyun.com/SAML-Role/Attributes/SessionDuration">https://www.aliyun.com/SAML-Role/Attributes/SessionDuration</a><br>
+<code>表达式</code>：python写，同理直接return或者自己写复杂的表达式</p>
+<p>取值要求为整数，单位为秒，最小值为900，最大值不能超过Role元素所代表的角色的最大会话时间。</p>
+<p>有兴趣可以看看<a target="_blank" rel="noopener external nofollow noreferrer" href="https://help.aliyun.com/zh/ram/user-guide/saml-response-for-role-based-sso">角色SSO的SAML响应_访问控制(RAM)-阿里云帮助中心</a></p>
+<h3 id="进行属性映射">进行属性映射</h3>
+<p>回到Authentik中，找到我们之前创建的Provider，点一下进入总览，编辑一下</p>
+<p>在<code>高级协议设置</code>中，找到<code>属性映射</code>，把预置的没用属性全部移除，把刚刚创建的两个属性移到右边，保存</p>
+<p>然后重新下载元数据，在阿里云SSO管理里更新一下元数据文档（存疑，建议还是更新一下）</p>
+<h3 id="创建Application（应用）">创建Application（应用）</h3>
+<p>在Authentik创建一个应用</p>
+<p><code>名称</code>：自填<br>
+<code>Slug</code>：自填<br>
+<code>提供程序</code>：选择我们之前创建的Provider<br>
+剩下的看自己喜好</p>
+<h3 id="权限设置">权限设置</h3>
+<p>默认创建的应用是所有用户都能访问的，如果不做权限控制，那么所有用户都能进你的阿里云😂</p>
+<p>这里我们点击创建的应用，选择<code>策略/组/用户绑定</code></p>
+<p>然后点击<code>绑定已存在的 策略/组/用户</code>（这里推荐先创建一个组，然后把能够使用该应用的用户拉到这个组里，然后赋予这个组使用这个应用的权限，方便管理）</p>
+<p>看自己选择是策略，组还是用户</p>
+<p>策略的话要自己写策略，灵活性更高</p>
+<p>Tips：默认注册流程中注册的用户是外部用户，无法进入Authentik仪表盘，可以去改一下注册流程</p>
+<h3 id="测试">测试</h3>
+<p>进入Authentik主界面，点击应用，跳转到阿里云，右上角看到角色登录，即成功登录。</p>
+<h2 id="后记">后记</h2>
+<p>折腾死我了，不过，Gemini 2.5Pro+Deep Research是真的好用😋</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://www.goodboyboy.top">GoodBoyboy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.goodboyboy.top/posts/3780326479.html">https://blog.goodboyboy.top/posts/3780326479.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.goodboyboy.top" target="_blank">GoodBoyboy 's Blog｜惬意小屋-点滴记忆</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E9%98%BF%E9%87%8C%E4%BA%91/">阿里云</a><a class="post-meta__tags" href="/tags/SSO/">SSO</a><a class="post-meta__tags" href="/tags/authentik/">authentik</a></div><div class="post-share"><div class="social-share" data-image="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="business-center"><div class="business-card"><div class="business-flip"><div class="business-front"><div class="business-strip-bottom"></div><div class="business-strip-top"></div><img class="business-logo" width="80" height="80" src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" alt="cardcode"><div class="business-Invitation">Invitation</div><div class="business-chip"><div class="business-chip-line"></div><div class="business-chip-line"></div><div class="business-chip-line"></div><div class="business-chip-line"></div><div class="business-chip-main"></div></div><svg class="business-wave" viewBox="0 3.71 26.959 38.787" width="26.959" height="38.787" fill="white"><path d="M19.709 3.719c.266.043.5.187.656.406 4.125 5.207 6.594 11.781 6.594 18.938 0 7.156-2.469 13.73-6.594 18.937-.195.336-.57.531-.957.492a.9946.9946 0 0 1-.851-.66c-.129-.367-.035-.777.246-1.051 3.855-4.867 6.156-11.023 6.156-17.718 0-6.696-2.301-12.852-6.156-17.719-.262-.317-.301-.762-.102-1.121.204-.36.602-.559 1.008-.504z"></path><path d="M13.74 7.563c.231.039.442.164.594.343 3.508 4.059 5.625 9.371 5.625 15.157 0 5.785-2.113 11.097-5.625 15.156-.363.422-1 .472-1.422.109-.422-.363-.472-1-.109-1.422 3.211-3.711 5.156-8.551 5.156-13.843 0-5.293-1.949-10.133-5.156-13.844-.27-.309-.324-.75-.141-1.114.188-.367.578-.582.985-.542h.093z"></path><path d="M7.584 11.438c.227.031.438.144.594.312 2.953 2.863 4.781 6.875 4.781 11.313 0 4.433-1.828 8.449-4.781 11.312-.398.387-1.035.383-1.422-.016-.387-.398-.383-1.035.016-1.421 2.582-2.504 4.187-5.993 4.187-9.875 0-3.883-1.605-7.372-4.187-9.875-.321-.282-.426-.739-.266-1.133.164-.395.559-.641.984-.617h.094zM1.178 15.531c.121.02.238.063.344.125 2.633 1.414 4.437 4.215 4.437 7.407 0 3.195-1.797 5.996-4.437 7.406-.492.258-1.102.07-1.36-.422-.257-.492-.07-1.102.422-1.359 2.012-1.075 3.375-3.176 3.375-5.625 0-2.446-1.371-4.551-3.375-5.625-.441-.204-.676-.692-.551-1.165.122-.468.567-.785 1.051-.742h.094z"></path></svg><div class="business-card-number"><div class="business-section">GoodBoyboy</div><div class="business-section">5201314***</div></div><div class="business-end"><span class="business-end-text">created:</span><span class="business-end-date">09/04/2015</span></div><div class="business-card-holder">Welcome to MyBlog</div><div class="business-master"><div class="business-circle business-master-red"></div><div class="business-circle business-master-yellow">   </div></div></div><div class="business-back"><div class="business-strip-black"></div><div class="business-ccv"><label>sitelink</label><div><a href="https://blog.goodboyboy.top">https://blog.goodboyboy.top</a></div></div><div class="business-terms"><p>Use this card to join MyBlog and participate in a pleasant discussion together .</p><p>Welcome to GoodBoyboy 's Blog,wish you a nice day .</p></div></div></div></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>赞助</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://pic.goodboyboy.top/imgs/2023/03/c1d1d23e539e7fba.webp" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://pic.goodboyboy.top/imgs/2023/03/c1d1d23e539e7fba.webp"/></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/2967291241.html" title="白嫖一年Gemini Pro"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">白嫖一年Gemini Pro</div></div><div class="info-2"><div class="info-item-1">前言 Google先前发起~~大学生白嫖计划~~ Google One AI Pro 教育学生优惠，面向巴西、印度尼西亚、日本、英国和美国大学生，时间截止于2025年6月30日 链接：https://gemini.google/students/ 白嫖 但是~~~经过很多人测试，国内教育邮箱也能通过，而且不限制卡bin（国内万事达/VISA卡也行） 不过之前由于账号地区问题，一直卡在港区没转到日区，导致出现此账号无法订阅 Google AI...</div></div></div></a><a class="pagination-related" href="/posts/2116962076.html" title="实验室生活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">实验室生活</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/posts/4077969796.html" title="阿里云高校计划领取300元无门槛优惠券"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-15</div><div class="info-item-2">阿里云高校计划领取300元无门槛优惠券</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a><a class="pagination-related" href="/posts/3489051457.html" title="基于OIDC实现Authentik与阿里云RAM角色的联合身份认证"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-07-14</div><div class="info-item-2">基于OIDC实现Authentik与阿里云RAM角色的联合身份认证</div></div><div class="info-2"><div class="info-item-1">前言 OIDC的教程来了😁 在阿里云，OIDC一般不用于登录WEB控制台，而是用于程序化访问，例如CLI、SDK或自定义应用程序，工作流程完全由API驱动，不过可以通过构造免登录URL来进行登录。 OIDC 复杂很多，这里仅按照最基础的能完成授权的流程写，具体项目请根据具体实际情况设置。 部分Authentik操作这里不详细写了，可以去看看之前写的阿里云角色SSO对接authentik进行单点登录  创建 Authentik Provider 在Authentik的控制台侧边栏Applications-&gt;Providers中创建provider，类型选OAuth2/OpenID...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div class="comment-switch"><span class="first-comment">Artalk</span><span id="switch-btn"></span><span class="second-comment">Utterances</span></div></div><div class="comment-wrap"><div><div id="artalk-wrap"></div></div><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">GoodBoyboy</div><div class="author-info-description">看朝霞万里，石头花开</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">263</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">297</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">37</div></a></div><a id="card-info-btn" href="https://blog.goodboyboy.top/atom.xml"><i class="fa-solid fa-rss"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://www.goodboyboy.top" target="_blank" title="Home"><i class="fa-solid fa-house"></i></a><a class="social-icon" href="mailto:me@goodboyboy.top" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://github.com/GoodBoyboy666" rel="external nofollow noreferrer" target="_blank" title="GitHub"><i class="fab fa-github"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">愿每个生命，都能被温柔对待</div></div><div class="card-widget ad_card" id="custom_ad_card"><div class="item-headline"><i class="fas fa-heartbeat"></i><span>本站由 QiuDun 提供公益内容分发</span></div><div class="item-content"><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.scdn.koxiuqiu.cc/"><img src="https://www.goodboyboy.top/uploads/img/qiudun.png" alt="QiuDun CDN" style="width: 100vw; height: auto; max-width: 100%;" /></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%98%E7%95%A5%E4%BB%B7%E5%80%BC"><span class="toc-number">2.1.</span> <span class="toc-text">战略价值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%E6%B5%81%E7%A8%8B"><span class="toc-number">2.2.</span> <span class="toc-text">登录流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6"><span class="toc-number">2.3.</span> <span class="toc-text">创建签名证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAProvider"><span class="toc-number">2.4.</span> <span class="toc-text">创建Provider</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E9%98%BF%E9%87%8C%E4%BA%91%E8%BA%AB%E4%BB%BD%E6%8F%90%E4%BE%9B%E5%95%86"><span class="toc-number">2.5.</span> <span class="toc-text">创建阿里云身份提供商</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E9%98%BF%E9%87%8C%E4%BA%91%E8%A7%92%E8%89%B2"><span class="toc-number">2.6.</span> <span class="toc-text">创建阿里云角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAAuthentik%E7%9A%84%E5%B1%9E%E6%80%A7%E6%98%A0%E5%B0%84"><span class="toc-number">2.7.</span> <span class="toc-text">创建Authentik的属性映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8C%E5%B1%9E%E6%80%A7%E6%98%A0%E5%B0%84"><span class="toc-number">2.8.</span> <span class="toc-text">进行属性映射</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAApplication%EF%BC%88%E5%BA%94%E7%94%A8%EF%BC%89"><span class="toc-number">2.9.</span> <span class="toc-text">创建Application（应用）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%83%E9%99%90%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.10.</span> <span class="toc-text">权限设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95"><span class="toc-number">2.11.</span> <span class="toc-text">测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-number">3.</span> <span class="toc-text">后记</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/4228956106.html" title="ESP32 S3开发小结"><img src="https://pic.goodboyboy.top/imgs/2025/08/23/xn20au.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ESP32 S3开发小结"/></a><div class="content"><a class="title" href="/posts/4228956106.html" title="ESP32 S3开发小结">ESP32 S3开发小结</a><time datetime="2025-08-23T12:30:38.000Z" title="发表于 2025-08-23 20:30:38">2025-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/2709354330.html" title="ESP32 S3外设小记">ESP32 S3外设小记</a><time datetime="2025-08-22T11:03:36.000Z" title="发表于 2025-08-22 19:03:36">2025-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/1775233746.html" title="Arduino+VSCode开发ESP32-S3">Arduino+VSCode开发ESP32-S3</a><time datetime="2025-08-20T14:11:49.000Z" title="发表于 2025-08-20 22:11:49">2025-08-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3337643602.html" title="EPS32-S3刷入MicroPython">EPS32-S3刷入MicroPython</a><time datetime="2025-08-18T03:30:16.000Z" title="发表于 2025-08-18 11:30:16">2025-08-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3701080839.html" title="EPS32 S3刷入Picokeys">EPS32 S3刷入Picokeys</a><time datetime="2025-08-18T02:56:57.000Z" title="发表于 2025-08-18 10:56:57">2025-08-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgba(27, 31, 35, .05);"><div id="footer-wrap"><div class="copyright">&copy;2015 - 2025 By GoodBoyboy</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><a href ="https://status.goodboyboy.top/status/normal" target="_blank">运行状态</a> | <a href="https://icp.gov.moe/?keyword=20236007" rel="external nofollow noreferrer" target="_blank">萌ICP备20236007号</a></br><--- 朝霞万里 石头花开 ---></br><a href="https://travel.moe/go.html?travel=on" rel="external nofollow noreferrer" title="异次元之旅-跃迁-我们一起去萌站成员的星球旅行吧！" target="_blank">异次元之旅</a> </br><i class="fa-solid fa-paw"></i></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button><button id="show-music" type="button" title="显示音乐控件" onclick="showmusic()"><i class="fa-solid fa-music"></i></button></div></div><div><script src="/js/utils.js?v=5.3.5"></script><script src="/js/main.js?v=5.3.5"></script><script src="https://jsd.foxsay.top/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.min.js"></script><script src="https://jsd.foxsay.top/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://jsd.foxsay.top/npm/katex@0.16.21/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://jsd.foxsay.top/npm/katex@0.16.21/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://jsd.foxsay.top/npm/mermaid@11.4.1/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://jsd.foxsay.top/npm/chart.js@4.4.8/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  let artalkItem = null
+  const option = null
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+
+  const destroyArtalk = () => {
+    if (artalkItem) {
+      artalkItem.destroy()
+      artalkItem = null
+    }
+  }
+
+  const artalkChangeMode = theme => artalkItem && artalkItem.setDarkMode(theme === 'dark')
+
+  const initArtalk = (el = document, pageKey = location.pathname) => {
+    artalkItem = Artalk.init({
+      el: el.querySelector('#artalk-wrap'),
+      server: 'https://artalk.goodboyboy.top',
+      site: 'GoodBoyboyBlog',
+      darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
+      ...option,
+      pageKey: isShuoshuo ? pageKey : (option && option.pageKey) || pageKey
+    })
+
+    if (GLOBAL_CONFIG.lightbox === 'null') return
+    artalkItem.on('list-loaded', () => {
+      artalkItem.ctx.get('list').getCommentNodes().forEach(comment => {
+        const $content = comment.getRender().$content
+        btf.loadLightbox($content.querySelectorAll('img:not([atk-emoticon])'))
+      })
+    })
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyArtalk = () => {
+        destroyArtalk()
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    btf.addGlobalFn('pjaxSendOnce', destroyArtalk, 'destroyArtalk')
+    btf.addGlobalFn('themeChange', artalkChangeMode, 'artalk')
+  }
+
+  const loadArtalk = async (el, pageKey) => {
+    if (typeof Artalk === 'object') initArtalk(el, pageKey)
+    else {
+      await btf.getCSS('https://jsd.foxsay.top/npm/artalk@2.9.1/dist/Artalk.min.css')
+      await btf.getScript('https://jsd.foxsay.top/npm/artalk@2.9.1/dist/Artalk.min.js')
+      initArtalk(el, pageKey)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Artalk' === 'Artalk'
+      ? window.shuoshuoComment = { loadComment: loadArtalk }
+      : window.loadOtherComment = loadArtalk
+    return
+  }
+
+  if ('Artalk' === 'Artalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('artalk-wrap'), loadArtalk)
+    else setTimeout(loadArtalk, 100)
+  } else {
+    window.loadOtherComment = loadArtalk
+  }
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+  const getUtterancesTheme = theme => theme === 'dark' ? 'photon-dark' : 'github-light'
+
+  const loadUtterances = (el = document, key) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyUtterances = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const config = {
+      src: 'https://utteranc.es/client.js',
+      repo: 'GoodBoyboy666/Blog-Comments',
+      theme: getUtterancesTheme(document.documentElement.getAttribute('data-theme')),
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      'issue-term': isShuoshuo ? key : (option && option['issue-term']) || 'pathname'
+    }
+
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => ele.setAttribute(key, value))
+    el.querySelector('#utterances-wrap').appendChild(ele)
+  }
+
+  const changeUtterancesTheme = theme => {
+    const iframe = document.querySelector('#utterances-wrap iframe')
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: getUtterancesTheme(theme)
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeUtterancesTheme, 'utterances')
+
+  if (isShuoshuo) {
+    'Artalk' === 'Utterances'
+      ? window.shuoshuoComment = { loadComment: loadUtterances }
+      : window.loadOtherComment = loadUtterances
+    return
+  }
+  
+  if ('Artalk' === 'Utterances' || !true) {
+    if (true) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.newestComments = {
+  changeContent: content => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<code>.*?<\/code>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g, "") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0, 150) + '...'
+    }
+    return content
+  },
+
+  generateHtml: (array, ele) => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class="aside-list-item">'
+
+        if (true && array[i].avatar) {
+          const imgAttr = 'src'
+          const lazyloadNative = ''
+          result += `<a href="${array[i].url}" class="thumbnail"><img ${imgAttr}="${array[i].avatar}" alt="${array[i].nick}" ${lazyloadNative}></a>`
+        }
+
+        result += `<div class="content">
+        <a class="comment" href="${array[i].url}" title="${array[i].content}">${array[i].content}</a>
+        <div class="name"><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '暂无评论'
+    }
+
+    ele.innerHTML = result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh(ele)
+  },
+
+  newestCommentInit: (name, getComment) => {
+    const $dom = document.querySelector('#card-newest-comments .aside-list')
+    if ($dom) {
+      const data = btf.saveToLocal.get(name)
+      if (data) {
+        newestComments.generateHtml(JSON.parse(data), $dom)
+      } else {
+        getComment($dom)
+      }
+    }
+  },
+
+  run: (name, getComment) => {
+    newestComments.newestCommentInit(name, getComment)
+    btf.addGlobalFn('pjaxComplete', () => newestComments.newestCommentInit(name, getComment), name)
+  }
+}</script><script>window.addEventListener('load', () => {
+  const keyName = 'artalk-newest-comments'
+  const { changeContent, generateHtml, run } = window.newestComments
+
+  const getAvatarValue = async () => {
+    const predefinedAvatarCdn = ''
+    const predefinedAvatarDefault = ''
+
+    const avatarDefaultFormat = e => e.startsWith('d=') ? e : `d=${e}`
+
+    if (predefinedAvatarCdn && predefinedAvatarDefault) {
+      return { avatarCdn: predefinedAvatarCdn, avatarDefault: avatarDefaultFormat(predefinedAvatarDefault) }
+    }
+
+    try {
+      const res = await fetch('https://artalk.goodboyboy.top/api/v2/conf')
+      const result = await res.json()
+      const { mirror, params, default: defaults } = result.frontend_conf.gravatar
+      const avatarCdn = predefinedAvatarCdn || mirror
+      let avatarDefault = avatarDefaultFormat(predefinedAvatarDefault || params || defaults)
+      return { avatarCdn, avatarDefault}
+    } catch (e) {
+      console.error(e)
+      return { avatarCdn: predefinedAvatarCdn, avatarDefault: avatarDefaultFormat(predefinedAvatarDefault) }
+    }
+  }
+
+  const searchParams = new URLSearchParams({
+    'site_name': 'GoodBoyboyBlog',
+    'limit': '12', // Fetch more comments to filter pending comments
+  })
+
+  const getComment = async (ele) => {
+    try {
+      const res = await fetch(`https://artalk.goodboyboy.top/api/v2/stats/latest_comments?${searchParams}`)
+      const result = await res.json()
+      const { avatarCdn, avatarDefault } = await getAvatarValue()
+      const artalk = result.data
+        .filter(e => !e.is_pending) // Filter pending comments
+        .slice(0, 6) // Limit the number of comments
+        .map(e => {
+          const avatar = avatarCdn && e.email_encrypted ? `${avatarCdn}${e.email_encrypted}?${avatarDefault}` : ''
+          return {
+            'avatar': avatar,
+            'content': changeContent(e.content_marked),
+            'nick': e.nick,
+            'url': e.page_url,
+            'date': e.date,
+          }
+        })
+      btf.saveToLocal.set(keyName, JSON.stringify(artalk), 10/(60*24))
+      generateHtml(artalk, ele)
+    } catch (e) {
+      console.log(e)
+      ele.textContent= "无法获取评论，请确认相关配置是否正确"
+    }
+  }
+
+  run(keyName, getComment)
+})</script><script data-pjax async src="/advance_script.js"></script><script async src="/js/APlayer.min.js"></script><div id="aplayerdiv" class="no-destroy"></div><script src="https://www.goodboyboy.top/uploads/music/music.js"></script><script src="/js/info.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://jsd.foxsay.top/npm/pjax@0.2.8/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script>(() => {
+  const option = null
+  const config = {"site_uv":false,"site_pv":false,"page_pv":false,"token":null}
+
+  const runTrack = () => {
+    umami.track(props => ({ ...props, url: window.location.pathname, title: GLOBAL_CONFIG_SITE.title }))
+  }
+
+  const loadUmamiJS = () => {
+    btf.getScript('https://umami.foxsay.top/script.js', {
+      'data-website-id': '21f60885-f721-40e3-89b5-0940bab42e68',
+      'data-auto-track': 'false',
+      ...option
+    }).then(runTrack)
+  }
+
+  const getData = async (isPost) => {
+    const now = Date.now()
+    const keyUrl = isPost ? `&url=${window.location.pathname}` : ''
+    const headerList = { 'Accept': 'application/json' }
+    if (true) headerList['Authorization'] = `Bearer ${config.token}`
+    else headerList['x-umami-api-key'] = config.token
+    const res = await fetch(`https://umami.foxsay.top/api/websites/21f60885-f721-40e3-89b5-0940bab42e68/stats?startAt=0000000000&endAt=${now}${keyUrl}`, {
+      method: "GET",
+      headers: headerList
+    })
+    return await res.json()
+  }
+
+  const insertData = async () => {
+    try {
+      if (GLOBAL_CONFIG_SITE.pageType === 'post' && config.page_pv) {
+        const pagePV = document.getElementById('umamiPV')
+        if (pagePV) {
+          const data = await getData(true)
+          pagePV.textContent = data.pageviews.value
+        }
+      } else {
+        const data = (config.site_uv || config.site_pv) && await getData()
+        if (config.site_uv) {
+          const siteUV = document.getElementById('umami-site-uv')
+          if (siteUV) siteUV.textContent = data.visitors.value
+        }
+        if (config.site_pv) {
+          const sitePV = document.getElementById('umami-site-pv')
+          if (sitePV) sitePV.textContent = data.pageviews.value
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load Umami Analytics:', e)
+    }
+  }
+
+  btf.addGlobalFn('pjaxComplete', runTrack, 'umami_analytics_run_track')
+  btf.addGlobalFn('pjaxComplete', insertData, 'umami_analytics_insert')
+
+  loadUmamiJS()
+  insertData()
+})()</script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.3.5"></script></div></div></body></html>
