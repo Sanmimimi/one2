@@ -1,0 +1,13 @@
+User-agent: *
+Crawl-delay: 5
+
+Disallow: /uploads/
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+Disallow: /cur/
+Disallow: /agreement/
+Disallow: /emotion/
+Disallow: /fcircle/
+
+Sitemap: https://blog.goodboyboy.top/sitemap.xml

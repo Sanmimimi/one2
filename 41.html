@@ -1,0 +1,741 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>我的世界皮肤站披风不加载或不更新问题 | GoodBoyboy 's Blog｜惬意小屋-点滴记忆</title><meta name="author" content="GoodBoyboy"><meta name="copyright" content="GoodBoyboy"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="皮肤站不加载或不更新披风有很多情况，需要一一来排查。 1.首先检查在游戏中是否穿戴了鞘翅 如果你的披风材质图片没有包含鞘翅的材质部分，安装鞘翅后披风会默认隐藏 解决方法：取下鞘翅或者修改披风文件 2.检查皮肤站是否关闭，或者出现500等错误 这个时候minecraft是无法正常请求到披风文件，所以就不会加载 解决方法：如果不是站长，就换个皮肤站，站长的话就启动皮肤站，500错误有很多情况，这里不一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的世界皮肤站披风不加载或不更新问题">
+<meta property="og:url" content="https://blog.goodboyboy.top/41.html">
+<meta property="og:site_name" content="GoodBoyboy &#39;s Blog｜惬意小屋-点滴记忆">
+<meta property="og:description" content="皮肤站不加载或不更新披风有很多情况，需要一一来排查。 1.首先检查在游戏中是否穿戴了鞘翅 如果你的披风材质图片没有包含鞘翅的材质部分，安装鞘翅后披风会默认隐藏 解决方法：取下鞘翅或者修改披风文件 2.检查皮肤站是否关闭，或者出现500等错误 这个时候minecraft是无法正常请求到披风文件，所以就不会加载 解决方法：如果不是站长，就换个皮肤站，站长的话就启动皮肤站，500错误有很多情况，这里不一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g">
+<meta property="article:published_time" content="2021-01-31T07:44:52.000Z">
+<meta property="article:modified_time" content="2021-01-31T07:44:52.000Z">
+<meta property="article:author" content="GoodBoyboy">
+<meta property="article:tag" content="Minecraft">
+<meta property="article:tag" content="CustomSkinLoad">
+<meta property="article:tag" content="皮肤站">
+<meta property="article:tag" content="blessing">
+<meta property="article:tag" content="skin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "我的世界皮肤站披风不加载或不更新问题",
+  "url": "https://blog.goodboyboy.top/41.html",
+  "image": "https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g",
+  "datePublished": "2021-01-31T07:44:52.000Z",
+  "dateModified": "2021-01-31T07:44:52.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "GoodBoyboy",
+      "url": "https://www.goodboyboy.top"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&d=monsterid&r=g"><link rel="canonical" href="https://blog.goodboyboy.top/41.html"><link rel="preconnect" href="//jsd.foxsay.top"/><link rel="stylesheet" href="/css/index.css?v=5.3.5"><link rel="stylesheet" href="https://jsd.foxsay.top/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><link rel="stylesheet" href="https://jsd.foxsay.top/npm/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://jsd.foxsay.top/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 8 || hour >= 22
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: GoodBoyboy","link":"链接: ","source":"来源: GoodBoyboy 's Blog｜惬意小屋-点滴记忆","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://jsd.foxsay.top/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '我的世界皮肤站披风不加载或不更新问题',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/font.css" media="none" onload="this.media='all'"><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/APlayer.min.css"><style type="text/css">
+.spoiler {
+  display: inline;
+}
+p.spoiler {
+  display: flex;
+}
+.spoiler a {
+  pointer-events: none;
+}
+.spoiler-blur, .spoiler-blur > * {
+  transition: text-shadow .5s ease;
+}
+.spoiler .spoiler-blur, .spoiler .spoiler-blur > * {
+  color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
+  text-shadow: 0 0 10px grey;
+  cursor: pointer;
+}
+.spoiler .spoiler-blur:hover, .spoiler .spoiler-blur:hover > * {
+  text-shadow: 0 0 5px grey;
+}
+.spoiler-box, .spoiler-box > * {
+  transition: color .5s ease,
+  background-color .5s ease;
+}
+.spoiler .spoiler-box, .spoiler .spoiler-box > * {
+  color: black;
+  background-color: black;
+  text-shadow: none;
+}</style><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="GoodBoyboy 's Blog｜惬意小屋-点滴记忆" type="application/atom+xml">
+</head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://jsd.foxsay.top/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://jsd.foxsay.top/npm/pace-js@1.2.4/pace.min.js"></script><div id="web_bg" style="background-image: url(https://api.goodboyboy.top/bing/?rand=true);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">263</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">297</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">37</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-folder-open"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-list-ul"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li><li><a class="site-page child" href="/categories/%E7%94%9F%E6%B4%BB/"><i class="fa-fw fa fa-pencil"></i><span> 生活</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-file-alt"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/msg/"><i class="fa-fw fa fa-pencil"></i><span> 留言板</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 图库</span></a></li><li><a class="site-page child" href="/TimeLine/"><i class="fa-fw fa-solid fa-list"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/reports/"><i class="fa-fw fa-solid fa-flag"></i><span> 报告</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://www.goodboyboy.top/mikutap/"><i class="fa-fw fa-solid fa-tape"></i><span> Mikutap</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-gamepad"></i><span> 我的游戏库</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa-solid fa-music"></i><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%85%AC%E5%91%8A/"><i class="fa-fw fa fa-info-circle"></i><span> 公告</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/free/"><i class="fa-fw fas fa-heart"></i><span> 公益项目</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-address-card"></i><span> Me</span></a></div><div class="menus_item"><a class="site-page" href="/agreement/"><i class="fa-fw fa fa-pencil"></i><span> 用户协议与隐私政策</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-bus-alt"></i><span> 开往/十年</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://www.travellings.cn/go.html"><span> 开往</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://foreverblog.cn/go.html"><span> 十年之约</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-battery-full"></i><span> 运行状态</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://status.goodboyboy.top/status/normal"><span> 主节点</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://stats.uptimerobot.com/Q7nWTIH07K"><span> 备用节点</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-color: rgba(255,255,255,0);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" alt="Logo"><span class="site-name">GoodBoyboy 's Blog｜惬意小屋-点滴记忆</span></a><a class="nav-page-title" href="/"><span class="site-name">我的世界皮肤站披风不加载或不更新问题</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-folder-open"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-list-ul"></i><span> 归档</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li><li><a class="site-page child" href="/categories/%E7%94%9F%E6%B4%BB/"><i class="fa-fw fa fa-pencil"></i><span> 生活</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-file-alt"></i><span> 页面</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/msg/"><i class="fa-fw fa fa-pencil"></i><span> 留言板</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 图库</span></a></li><li><a class="site-page child" href="/TimeLine/"><i class="fa-fw fa-solid fa-list"></i><span> 时间轴</span></a></li><li><a class="site-page child" href="/reports/"><i class="fa-fw fa-solid fa-flag"></i><span> 报告</span></a></li><li><a class="site-page child" target="_blank" rel="noopener" href="https://www.goodboyboy.top/mikutap/"><i class="fa-fw fa-solid fa-tape"></i><span> Mikutap</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-gamepad"></i><span> 我的游戏库</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa-solid fa-music"></i><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%85%AC%E5%91%8A/"><i class="fa-fw fa fa-info-circle"></i><span> 公告</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/free/"><i class="fa-fw fas fa-heart"></i><span> 公益项目</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-address-card"></i><span> Me</span></a></div><div class="menus_item"><a class="site-page" href="/agreement/"><i class="fa-fw fa fa-pencil"></i><span> 用户协议与隐私政策</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-bus-alt"></i><span> 开往/十年</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://www.travellings.cn/go.html"><span> 开往</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://foreverblog.cn/go.html"><span> 十年之约</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-battery-full"></i><span> 运行状态</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://status.goodboyboy.top/status/normal"><span> 主节点</span></a></li><li><a class="site-page child" target="_blank" rel="noopener external nofollow noreferrer" href="https://stats.uptimerobot.com/Q7nWTIH07K"><span> 备用节点</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">我的世界皮肤站披风不加载或不更新问题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-01-31T07:44:52.000Z" title="发表于 2021-01-31 15:44:52">2021-01-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-01-31T07:44:52.000Z" title="更新于 2021-01-31 15:44:52">2021-01-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%99%E7%A8%8B/">教程</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%99%E7%A8%8B/Web/">Web</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">486</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>1分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:365,&quot;messagePrev&quot;:&quot;此文章距离最后一次更新已有&quot;,&quot;messageNext&quot;:&quot;天, 文章内容可能已经过时.&quot;,&quot;postUpdate&quot;:&quot;2021-01-31 15:44:52&quot;}" hidden></div><p>皮肤站不加载或不更新披风有很多情况，需要一一来排查。</p>
+<h2 id="1-首先检查在游戏中是否穿戴了鞘翅">1.首先检查在游戏中是否穿戴了鞘翅</h2>
+<p>如果你的披风材质图片没有包含鞘翅的材质部分，安装鞘翅后披风会默认隐藏</p>
+<p>解决方法：取下鞘翅或者修改披风文件</p>
+<h2 id="2-检查皮肤站是否关闭，或者出现500等错误">2.检查皮肤站是否关闭，或者出现500等错误</h2>
+<p>这个时候minecraft是无法正常请求到披风文件，所以就不会加载</p>
+<p>解决方法：如果不是站长，就换个皮肤站，站长的话就启动皮肤站，500错误有很多情况，这里不一一阐述，请大家自行百度。</p>
+<h2 id="3-检查是否正确使用了皮肤站">3.检查是否正确使用了皮肤站</h2>
+<p>请确保你的披风已经应用于你的角色</p>
+<p>解决方法：应用即可</p>
+<h2 id="4-检查是否能正常请求到用户材质">4.检查是否能正常请求到用户材质</h2>
+<p>先访问 皮肤站域名/你的游戏用户名.json 例如<a target="_blank" rel="noopener external nofollow noreferrer" href="https://skin.goodboyboy.top/goodboyboy.json">https://skin.goodboyboy.top/goodboyboy.json</a></p>
+<p>看是否能正常请求。成功的话应该是一串json，再在这串json中找到cape后面的一串ID，访问 皮肤站域名/csl/textures/刚刚cape的ID 如果成功的话就会出现你的披风源文件。如果刚刚两项中任何一项出错就是皮肤站出问题了</p>
+<p>解决方法：百度、询问作者、重装皮肤站</p>
+<h2 id="5-如果上面都没问题，现在你需要检查mod">5.如果上面都没问题，现在你需要检查mod</h2>
+<p>检查你是否正确安装并加载CustomSkinload皮肤mod（有可能是你的mod加载出了问题）</p>
+<p>解决方法：正确加载（并且不要忘记把皮肤站的皮肤加载地址添加到配置文件）</p>
+<h2 id="6-检查是否开启了缓存功能">6.检查是否开启了缓存功能</h2>
+<p>检查.minecraft\CustomSkinLoader\CustomSkinLoad.json里面cacheExpiry改为0，enablecacheautoclean 的false改为true，删掉在.minecraft\CustomSkinLoader\caches\下面的文件。最后重新连接服务器即可（需要多重复几次）</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://www.goodboyboy.top">GoodBoyboy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.goodboyboy.top/41.html">https://blog.goodboyboy.top/41.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.goodboyboy.top" target="_blank">GoodBoyboy 's Blog｜惬意小屋-点滴记忆</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Minecraft/">Minecraft</a><a class="post-meta__tags" href="/tags/CustomSkinLoad/">CustomSkinLoad</a><a class="post-meta__tags" href="/tags/%E7%9A%AE%E8%82%A4%E7%AB%99/">皮肤站</a><a class="post-meta__tags" href="/tags/blessing/">blessing</a><a class="post-meta__tags" href="/tags/skin/">skin</a></div><div class="post-share"><div class="social-share" data-image="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="business-center"><div class="business-card"><div class="business-flip"><div class="business-front"><div class="business-strip-bottom"></div><div class="business-strip-top"></div><img class="business-logo" width="80" height="80" src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" alt="cardcode"><div class="business-Invitation">Invitation</div><div class="business-chip"><div class="business-chip-line"></div><div class="business-chip-line"></div><div class="business-chip-line"></div><div class="business-chip-line"></div><div class="business-chip-main"></div></div><svg class="business-wave" viewBox="0 3.71 26.959 38.787" width="26.959" height="38.787" fill="white"><path d="M19.709 3.719c.266.043.5.187.656.406 4.125 5.207 6.594 11.781 6.594 18.938 0 7.156-2.469 13.73-6.594 18.937-.195.336-.57.531-.957.492a.9946.9946 0 0 1-.851-.66c-.129-.367-.035-.777.246-1.051 3.855-4.867 6.156-11.023 6.156-17.718 0-6.696-2.301-12.852-6.156-17.719-.262-.317-.301-.762-.102-1.121.204-.36.602-.559 1.008-.504z"></path><path d="M13.74 7.563c.231.039.442.164.594.343 3.508 4.059 5.625 9.371 5.625 15.157 0 5.785-2.113 11.097-5.625 15.156-.363.422-1 .472-1.422.109-.422-.363-.472-1-.109-1.422 3.211-3.711 5.156-8.551 5.156-13.843 0-5.293-1.949-10.133-5.156-13.844-.27-.309-.324-.75-.141-1.114.188-.367.578-.582.985-.542h.093z"></path><path d="M7.584 11.438c.227.031.438.144.594.312 2.953 2.863 4.781 6.875 4.781 11.313 0 4.433-1.828 8.449-4.781 11.312-.398.387-1.035.383-1.422-.016-.387-.398-.383-1.035.016-1.421 2.582-2.504 4.187-5.993 4.187-9.875 0-3.883-1.605-7.372-4.187-9.875-.321-.282-.426-.739-.266-1.133.164-.395.559-.641.984-.617h.094zM1.178 15.531c.121.02.238.063.344.125 2.633 1.414 4.437 4.215 4.437 7.407 0 3.195-1.797 5.996-4.437 7.406-.492.258-1.102.07-1.36-.422-.257-.492-.07-1.102.422-1.359 2.012-1.075 3.375-3.176 3.375-5.625 0-2.446-1.371-4.551-3.375-5.625-.441-.204-.676-.692-.551-1.165.122-.468.567-.785 1.051-.742h.094z"></path></svg><div class="business-card-number"><div class="business-section">GoodBoyboy</div><div class="business-section">5201314***</div></div><div class="business-end"><span class="business-end-text">created:</span><span class="business-end-date">09/04/2015</span></div><div class="business-card-holder">Welcome to MyBlog</div><div class="business-master"><div class="business-circle business-master-red"></div><div class="business-circle business-master-yellow">   </div></div></div><div class="business-back"><div class="business-strip-black"></div><div class="business-ccv"><label>sitelink</label><div><a href="https://blog.goodboyboy.top">https://blog.goodboyboy.top</a></div></div><div class="business-terms"><p>Use this card to join MyBlog and participate in a pleasant discussion together .</p><p>Welcome to GoodBoyboy 's Blog,wish you a nice day .</p></div></div></div></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>赞助</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://pic.goodboyboy.top/imgs/2023/03/c1d1d23e539e7fba.webp" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://pic.goodboyboy.top/imgs/2023/03/c1d1d23e539e7fba.webp"/></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/40.html" title="Windows系统openssl颁发根证书以及下签子证书和代码签名证书"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Windows系统openssl颁发根证书以及下签子证书和代码签名证书</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a><a class="pagination-related" href="/53.html" title="Color -X欣赏(视频+音乐)~"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Color -X欣赏(视频+音乐)~</div></div><div class="info-2"><div class="info-item-1"> 新人视频，如果有做的不够好的地方还请大家指出哦~ 制作不易，如果喜欢的话还请给个三连吧~    </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/175.html" title="我的世界之使用第三方皮肤站"><img class="cover" src="https://pic.goodboyboy.top/imgs/2023/03/3f8d7ba0ee10a885.webp" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-17</div><div class="info-item-2">我的世界之使用第三方皮肤站</div></div><div class="info-2"><div class="info-item-1">准备环节   第三方皮肤站   HMCL启动器    测试皮肤站GoodBoyboy’s Minecraft...</div></div></div></a><a class="pagination-related" href="/posts/3464924544.html" title="Debian开玩Minecraft"><img class="cover" src="https://pic.goodboyboy.top/imgs/2025/06/10/lvaq50.webp" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-10</div><div class="info-item-2">Debian开玩Minecraft</div></div><div class="info-2"><div class="info-item-1">前言 虽然装Debian确实是为了外出方便省电，但还是需要劳逸结合的（逃 官方启动器 在官方下载页面https://www.minecraft.net/zh-hans/download找到Debian 版及基于 Debian...</div></div></div></a><a class="pagination-related" href="/posts/2372224366.html" title="国际版Minecraft打骨折了！！！"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-15</div><div class="info-item-2">国际版Minecraft打骨折了！！！</div></div><div class="info-2"><div class="info-item-1">今天在小黑盒看到Minecraft国际版居然只要44.5人民币！！！ 查了一下发现是Minecraft 15周年庆，所以在原来89元的基础上再打五折！！！ 有图有真相：   不仅是Minecraft本体打折了，它的系列游戏都打了五折！！！  想要入手国际版Minecraft的友友们可以抓紧时间入咯~  Tips：官网好像锁区买不了，不过可以去微软商店购买，支持银联和支付宝，使用支付宝记得关闭购买后打开的免密支付。  </div></div></div></a><a class="pagination-related" href="/posts/1942751423.html" title="Minecraft Server TCP 状态获取详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-30</div><div class="info-item-2">Minecraft Server TCP 状态获取详解</div></div><div class="info-2"><div class="info-item-1"> 测试版本为1.20.6，插件服务器，理论上适用于1.7+版本服务器，已知forge服务器在测试延迟时会出现未收到 Server response的情况  开源Minecraft Server Status已在Github发布，项目地址：https://github.com/GoodBoyboy666/Minecraft-Server-Status  数据包结构 在wiki.vg上我们可以看到，Minecraft数据包的格式如下图：  整个数据包格式采用数据包长度+Packet ID+数据的格式。 数据包长度和Packet ID均使用VarInt数据类型，具体可以看...</div></div></div></a><a class="pagination-related" href="/144.html" title="搭建Hypixel(嗨皮咳嗽)代理加速ip"><img class="cover" src="https://pic.goodboyboy.top/imgs/2023/03/656b46f7a1774561.webp" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-15</div><div class="info-item-2">搭建Hypixel(嗨皮咳嗽)代理加速ip</div></div><div class="info-2"><div class="info-item-1">前言 此教程需要一定动手能力和一定的网络知识，对小白不友好 有探索精神的同学即使不懂也可以参考的 !  开始 准备环节 ● 一双手 ● 一个脑子 ● 一台海外服务器 ● nginx ●...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div class="comment-switch"><span class="first-comment">Artalk</span><span id="switch-btn"></span><span class="second-comment">Utterances</span></div></div><div class="comment-wrap"><div><div id="artalk-wrap"></div></div><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://gravatar.alexfox.top/avatar/9da9d1d515d273d4794015f2321f6e04?s=96&amp;d=monsterid&amp;r=g" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">GoodBoyboy</div><div class="author-info-description">看朝霞万里，石头花开</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">263</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">297</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">37</div></a></div><a id="card-info-btn" href="https://blog.goodboyboy.top/atom.xml"><i class="fa-solid fa-rss"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://www.goodboyboy.top" target="_blank" title="Home"><i class="fa-solid fa-house"></i></a><a class="social-icon" href="mailto:me@goodboyboy.top" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://github.com/GoodBoyboy666" rel="external nofollow noreferrer" target="_blank" title="GitHub"><i class="fab fa-github"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">愿每个生命，都能被温柔对待</div></div><div class="card-widget ad_card" id="custom_ad_card"><div class="item-headline"><i class="fas fa-heartbeat"></i><span>本站由 QiuDun 提供公益内容分发</span></div><div class="item-content"><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.scdn.koxiuqiu.cc/"><img src="https://www.goodboyboy.top/uploads/img/qiudun.png" alt="QiuDun CDN" style="width: 100vw; height: auto; max-width: 100%;" /></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E9%A6%96%E5%85%88%E6%A3%80%E6%9F%A5%E5%9C%A8%E6%B8%B8%E6%88%8F%E4%B8%AD%E6%98%AF%E5%90%A6%E7%A9%BF%E6%88%B4%E4%BA%86%E9%9E%98%E7%BF%85"><span class="toc-number">1.</span> <span class="toc-text">1.首先检查在游戏中是否穿戴了鞘翅</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A3%80%E6%9F%A5%E7%9A%AE%E8%82%A4%E7%AB%99%E6%98%AF%E5%90%A6%E5%85%B3%E9%97%AD%EF%BC%8C%E6%88%96%E8%80%85%E5%87%BA%E7%8E%B0500%E7%AD%89%E9%94%99%E8%AF%AF"><span class="toc-number">2.</span> <span class="toc-text">2.检查皮肤站是否关闭，或者出现500等错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E4%BA%86%E7%9A%AE%E8%82%A4%E7%AB%99"><span class="toc-number">3.</span> <span class="toc-text">3.检查是否正确使用了皮肤站</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E8%83%BD%E6%AD%A3%E5%B8%B8%E8%AF%B7%E6%B1%82%E5%88%B0%E7%94%A8%E6%88%B7%E6%9D%90%E8%B4%A8"><span class="toc-number">4.</span> <span class="toc-text">4.检查是否能正常请求到用户材质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A6%82%E6%9E%9C%E4%B8%8A%E9%9D%A2%E9%83%BD%E6%B2%A1%E9%97%AE%E9%A2%98%EF%BC%8C%E7%8E%B0%E5%9C%A8%E4%BD%A0%E9%9C%80%E8%A6%81%E6%A3%80%E6%9F%A5mod"><span class="toc-number">5.</span> <span class="toc-text">5.如果上面都没问题，现在你需要检查mod</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E5%BC%80%E5%90%AF%E4%BA%86%E7%BC%93%E5%AD%98%E5%8A%9F%E8%83%BD"><span class="toc-number">6.</span> <span class="toc-text">6.检查是否开启了缓存功能</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/4228956106.html" title="ESP32 S3开发小结"><img src="https://pic.goodboyboy.top/imgs/2025/08/23/xn20au.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="ESP32 S3开发小结"/></a><div class="content"><a class="title" href="/posts/4228956106.html" title="ESP32 S3开发小结">ESP32 S3开发小结</a><time datetime="2025-08-23T12:30:38.000Z" title="发表于 2025-08-23 20:30:38">2025-08-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/2709354330.html" title="ESP32 S3外设小记">ESP32 S3外设小记</a><time datetime="2025-08-22T11:03:36.000Z" title="发表于 2025-08-22 19:03:36">2025-08-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/1775233746.html" title="Arduino+VSCode开发ESP32-S3">Arduino+VSCode开发ESP32-S3</a><time datetime="2025-08-20T14:11:49.000Z" title="发表于 2025-08-20 22:11:49">2025-08-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3337643602.html" title="EPS32-S3刷入MicroPython">EPS32-S3刷入MicroPython</a><time datetime="2025-08-18T03:30:16.000Z" title="发表于 2025-08-18 11:30:16">2025-08-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/3701080839.html" title="EPS32 S3刷入Picokeys">EPS32 S3刷入Picokeys</a><time datetime="2025-08-18T02:56:57.000Z" title="发表于 2025-08-18 10:56:57">2025-08-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-color: rgba(27, 31, 35, .05);"><div id="footer-wrap"><div class="copyright">&copy;2015 - 2025 By GoodBoyboy</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div><div class="footer_custom_text"><a href ="https://status.goodboyboy.top/status/normal" target="_blank">运行状态</a> | <a href="https://icp.gov.moe/?keyword=20236007" rel="external nofollow noreferrer" target="_blank">萌ICP备20236007号</a></br><--- 朝霞万里 石头花开 ---></br><a href="https://travel.moe/go.html?travel=on" rel="external nofollow noreferrer" title="异次元之旅-跃迁-我们一起去萌站成员的星球旅行吧！" target="_blank">异次元之旅</a> </br><i class="fa-solid fa-paw"></i></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button><button id="show-music" type="button" title="显示音乐控件" onclick="showmusic()"><i class="fa-solid fa-music"></i></button></div></div><div><script src="/js/utils.js?v=5.3.5"></script><script src="/js/main.js?v=5.3.5"></script><script src="https://jsd.foxsay.top/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.min.js"></script><script src="https://jsd.foxsay.top/npm/node-snackbar@0.1.16/dist/snackbar.min.js"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('https://jsd.foxsay.top/npm/katex@0.16.21/dist/katex.min.css')
+    if (true) {
+      await btf.getScript('https://jsd.foxsay.top/npm/katex@0.16.21/dist/contrib/copy-tex.min.js')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (true) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://jsd.foxsay.top/npm/mermaid@11.4.1/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const applyThemeDefaultsConfig = theme => {
+    if (theme === 'dark-mode') {
+      Chart.defaults.color = "rgba(255, 255, 255, 0.8)"
+      Chart.defaults.borderColor = "rgba(255, 255, 255, 0.2)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    } else {
+      Chart.defaults.color = "rgba(0, 0, 0, 0.8)"
+      Chart.defaults.borderColor = "rgba(0, 0, 0, 0.1)"
+      Chart.defaults.scale.ticks.backdropColor = "transparent"
+    }
+  }
+
+  // Recursively traverse the config object and automatically apply theme-specific color schemes
+  const applyThemeConfig = (obj, theme) => {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.keys(obj).forEach(key => {
+      const value = obj[key]
+      // If the property is an object and has theme-specific options, apply them
+      if (typeof value === 'object' && value !== null) {
+        if (value[theme]) {
+          obj[key] = value[theme] // Apply the value for the current theme
+        } else {
+          // Recursively process child objects
+          applyThemeConfig(value, theme)
+        }
+      }
+    })
+  }
+
+  const runChartJS = ele => {
+    window.loadChartJS = true
+
+    Array.from(ele).forEach((item, index) => {
+      const chartSrc = item.firstElementChild
+      const chartID = item.getAttribute('data-chartjs-id') || ('chartjs-' + index) // Use custom ID or default ID
+      const width = item.getAttribute('data-width')
+      const existingCanvas = document.getElementById(chartID)
+
+      // If a canvas already exists, remove it to avoid rendering duplicates
+      if (existingCanvas) {
+          existingCanvas.parentNode.remove()
+      }
+
+      const chartDefinition = chartSrc.textContent
+      const canvas = document.createElement('canvas')
+      canvas.id = chartID
+
+      const div = document.createElement('div')
+      div.className = 'chartjs-wrap'
+
+      if (width) {
+        div.style.width = width
+      }
+
+      div.appendChild(canvas)
+      chartSrc.insertAdjacentElement('afterend', div)
+
+      const ctx = document.getElementById(chartID).getContext('2d')
+
+      const config = JSON.parse(chartDefinition)
+
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark-mode' : 'light-mode'
+
+      // Set default styles (initial setup)
+      applyThemeDefaultsConfig(theme)
+
+      // Automatically traverse the config and apply dual-mode color schemes
+      applyThemeConfig(config, theme)
+
+      new Chart(ctx, config)
+    })
+  }
+
+  const loadChartJS = () => {
+    const chartJSEle = document.querySelectorAll('#article-container .chartjs-container')
+    if (chartJSEle.length === 0) return
+
+    window.loadChartJS ? runChartJS(chartJSEle) : btf.getScript('https://jsd.foxsay.top/npm/chart.js@4.4.8/dist/chart.umd.min.js').then(() => runChartJS(chartJSEle))
+  }
+
+  // Listen for theme change events
+  btf.addGlobalFn('themeChange', loadChartJS, 'chartjs')
+  btf.addGlobalFn('encrypt', loadChartJS, 'chartjs')
+
+  window.pjax ? loadChartJS() : document.addEventListener('DOMContentLoaded', loadChartJS)
+})()</script><script>(() => {
+  let artalkItem = null
+  const option = null
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+
+  const destroyArtalk = () => {
+    if (artalkItem) {
+      artalkItem.destroy()
+      artalkItem = null
+    }
+  }
+
+  const artalkChangeMode = theme => artalkItem && artalkItem.setDarkMode(theme === 'dark')
+
+  const initArtalk = (el = document, pageKey = location.pathname) => {
+    artalkItem = Artalk.init({
+      el: el.querySelector('#artalk-wrap'),
+      server: 'https://artalk.goodboyboy.top',
+      site: 'GoodBoyboyBlog',
+      darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
+      ...option,
+      pageKey: isShuoshuo ? pageKey : (option && option.pageKey) || pageKey
+    })
+
+    if (GLOBAL_CONFIG.lightbox === 'null') return
+    artalkItem.on('list-loaded', () => {
+      artalkItem.ctx.get('list').getCommentNodes().forEach(comment => {
+        const $content = comment.getRender().$content
+        btf.loadLightbox($content.querySelectorAll('img:not([atk-emoticon])'))
+      })
+    })
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyArtalk = () => {
+        destroyArtalk()
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    btf.addGlobalFn('pjaxSendOnce', destroyArtalk, 'destroyArtalk')
+    btf.addGlobalFn('themeChange', artalkChangeMode, 'artalk')
+  }
+
+  const loadArtalk = async (el, pageKey) => {
+    if (typeof Artalk === 'object') initArtalk(el, pageKey)
+    else {
+      await btf.getCSS('https://jsd.foxsay.top/npm/artalk@2.9.1/dist/Artalk.min.css')
+      await btf.getScript('https://jsd.foxsay.top/npm/artalk@2.9.1/dist/Artalk.min.js')
+      initArtalk(el, pageKey)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Artalk' === 'Artalk'
+      ? window.shuoshuoComment = { loadComment: loadArtalk }
+      : window.loadOtherComment = loadArtalk
+    return
+  }
+
+  if ('Artalk' === 'Artalk' || !true) {
+    if (true) btf.loadComment(document.getElementById('artalk-wrap'), loadArtalk)
+    else setTimeout(loadArtalk, 100)
+  } else {
+    window.loadOtherComment = loadArtalk
+  }
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+  const getUtterancesTheme = theme => theme === 'dark' ? 'photon-dark' : 'github-light'
+
+  const loadUtterances = (el = document, key) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyUtterances = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const config = {
+      src: 'https://utteranc.es/client.js',
+      repo: 'GoodBoyboy666/Blog-Comments',
+      theme: getUtterancesTheme(document.documentElement.getAttribute('data-theme')),
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      'issue-term': isShuoshuo ? key : (option && option['issue-term']) || 'pathname'
+    }
+
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => ele.setAttribute(key, value))
+    el.querySelector('#utterances-wrap').appendChild(ele)
+  }
+
+  const changeUtterancesTheme = theme => {
+    const iframe = document.querySelector('#utterances-wrap iframe')
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: getUtterancesTheme(theme)
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeUtterancesTheme, 'utterances')
+
+  if (isShuoshuo) {
+    'Artalk' === 'Utterances'
+      ? window.shuoshuoComment = { loadComment: loadUtterances }
+      : window.loadOtherComment = loadUtterances
+    return
+  }
+  
+  if ('Artalk' === 'Utterances' || !true) {
+    if (true) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.newestComments = {
+  changeContent: content => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<code>.*?<\/code>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g, "") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0, 150) + '...'
+    }
+    return content
+  },
+
+  generateHtml: (array, ele) => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class="aside-list-item">'
+
+        if (true && array[i].avatar) {
+          const imgAttr = 'src'
+          const lazyloadNative = ''
+          result += `<a href="${array[i].url}" class="thumbnail"><img ${imgAttr}="${array[i].avatar}" alt="${array[i].nick}" ${lazyloadNative}></a>`
+        }
+
+        result += `<div class="content">
+        <a class="comment" href="${array[i].url}" title="${array[i].content}">${array[i].content}</a>
+        <div class="name"><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '暂无评论'
+    }
+
+    ele.innerHTML = result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh(ele)
+  },
+
+  newestCommentInit: (name, getComment) => {
+    const $dom = document.querySelector('#card-newest-comments .aside-list')
+    if ($dom) {
+      const data = btf.saveToLocal.get(name)
+      if (data) {
+        newestComments.generateHtml(JSON.parse(data), $dom)
+      } else {
+        getComment($dom)
+      }
+    }
+  },
+
+  run: (name, getComment) => {
+    newestComments.newestCommentInit(name, getComment)
+    btf.addGlobalFn('pjaxComplete', () => newestComments.newestCommentInit(name, getComment), name)
+  }
+}</script><script>window.addEventListener('load', () => {
+  const keyName = 'artalk-newest-comments'
+  const { changeContent, generateHtml, run } = window.newestComments
+
+  const getAvatarValue = async () => {
+    const predefinedAvatarCdn = ''
+    const predefinedAvatarDefault = ''
+
+    const avatarDefaultFormat = e => e.startsWith('d=') ? e : `d=${e}`
+
+    if (predefinedAvatarCdn && predefinedAvatarDefault) {
+      return { avatarCdn: predefinedAvatarCdn, avatarDefault: avatarDefaultFormat(predefinedAvatarDefault) }
+    }
+
+    try {
+      const res = await fetch('https://artalk.goodboyboy.top/api/v2/conf')
+      const result = await res.json()
+      const { mirror, params, default: defaults } = result.frontend_conf.gravatar
+      const avatarCdn = predefinedAvatarCdn || mirror
+      let avatarDefault = avatarDefaultFormat(predefinedAvatarDefault || params || defaults)
+      return { avatarCdn, avatarDefault}
+    } catch (e) {
+      console.error(e)
+      return { avatarCdn: predefinedAvatarCdn, avatarDefault: avatarDefaultFormat(predefinedAvatarDefault) }
+    }
+  }
+
+  const searchParams = new URLSearchParams({
+    'site_name': 'GoodBoyboyBlog',
+    'limit': '12', // Fetch more comments to filter pending comments
+  })
+
+  const getComment = async (ele) => {
+    try {
+      const res = await fetch(`https://artalk.goodboyboy.top/api/v2/stats/latest_comments?${searchParams}`)
+      const result = await res.json()
+      const { avatarCdn, avatarDefault } = await getAvatarValue()
+      const artalk = result.data
+        .filter(e => !e.is_pending) // Filter pending comments
+        .slice(0, 6) // Limit the number of comments
+        .map(e => {
+          const avatar = avatarCdn && e.email_encrypted ? `${avatarCdn}${e.email_encrypted}?${avatarDefault}` : ''
+          return {
+            'avatar': avatar,
+            'content': changeContent(e.content_marked),
+            'nick': e.nick,
+            'url': e.page_url,
+            'date': e.date,
+          }
+        })
+      btf.saveToLocal.set(keyName, JSON.stringify(artalk), 10/(60*24))
+      generateHtml(artalk, ele)
+    } catch (e) {
+      console.log(e)
+      ele.textContent= "无法获取评论，请确认相关配置是否正确"
+    }
+  }
+
+  run(keyName, getComment)
+})</script><script data-pjax async src="/advance_script.js"></script><script async src="/js/APlayer.min.js"></script><div id="aplayerdiv" class="no-destroy"></div><script src="https://www.goodboyboy.top/uploads/music/music.js"></script><script src="/js/info.js"></script><canvas class="fireworks" mobile="false"></canvas><script src="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://jsd.foxsay.top/npm/butterfly-extsrc@1.1.4/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://jsd.foxsay.top/npm/pjax@0.2.8/pjax.min.js"></script><script>(() => {
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => fn())
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      const usePjax = true
+      false 
+        ? (usePjax ? pjax.loadUrl('/404.html') : window.location.href = '/404.html')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})()</script><script>(() => {
+  const option = null
+  const config = {"site_uv":false,"site_pv":false,"page_pv":false,"token":null}
+
+  const runTrack = () => {
+    umami.track(props => ({ ...props, url: window.location.pathname, title: GLOBAL_CONFIG_SITE.title }))
+  }
+
+  const loadUmamiJS = () => {
+    btf.getScript('https://umami.foxsay.top/script.js', {
+      'data-website-id': '21f60885-f721-40e3-89b5-0940bab42e68',
+      'data-auto-track': 'false',
+      ...option
+    }).then(runTrack)
+  }
+
+  const getData = async (isPost) => {
+    const now = Date.now()
+    const keyUrl = isPost ? `&url=${window.location.pathname}` : ''
+    const headerList = { 'Accept': 'application/json' }
+    if (true) headerList['Authorization'] = `Bearer ${config.token}`
+    else headerList['x-umami-api-key'] = config.token
+    const res = await fetch(`https://umami.foxsay.top/api/websites/21f60885-f721-40e3-89b5-0940bab42e68/stats?startAt=0000000000&endAt=${now}${keyUrl}`, {
+      method: "GET",
+      headers: headerList
+    })
+    return await res.json()
+  }
+
+  const insertData = async () => {
+    try {
+      if (GLOBAL_CONFIG_SITE.pageType === 'post' && config.page_pv) {
+        const pagePV = document.getElementById('umamiPV')
+        if (pagePV) {
+          const data = await getData(true)
+          pagePV.textContent = data.pageviews.value
+        }
+      } else {
+        const data = (config.site_uv || config.site_pv) && await getData()
+        if (config.site_uv) {
+          const siteUV = document.getElementById('umami-site-uv')
+          if (siteUV) siteUV.textContent = data.visitors.value
+        }
+        if (config.site_pv) {
+          const sitePV = document.getElementById('umami-site-pv')
+          if (sitePV) sitePV.textContent = data.pageviews.value
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load Umami Analytics:', e)
+    }
+  }
+
+  btf.addGlobalFn('pjaxComplete', runTrack, 'umami_analytics_run_track')
+  btf.addGlobalFn('pjaxComplete', insertData, 'umami_analytics_insert')
+
+  loadUmamiJS()
+  insertData()
+})()</script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.3.5"></script></div></div></body></html>
